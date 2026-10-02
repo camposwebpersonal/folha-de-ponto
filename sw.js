@@ -1,5 +1,5 @@
-const CACHE='folha-ponto-v2';
-const ASSETS=['./','index.html','styles.css','js/app.js','js/config.js','js/model.js','js/pdf.js','assets/logo-sertania.png','manifest.json'];
+const CACHE='ubsf-nova-sertania-v3';
+const ASSETS=['./','index.html','styles.css','js/app.js','js/config.js','js/model.js','js/pdf.js','assets/logo-sertania.png','assets/avisos/renovacao-de-receitas.png','assets/avisos/renovacao-de-receitas.pdf','manifest.json'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',event=>{

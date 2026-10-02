@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="210mm" height="297mm" viewBox="0 0 2480 3508">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f7fbf8"/><stop offset="1" stop-color="#e8f4ef"/></linearGradient>
+    <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#064e43"/><stop offset="1" stop-color="#087d65"/></linearGradient>
+    <pattern id="dots" width="48" height="48" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="4" fill="#fff" opacity=".08"/></pattern>
+  </defs>
+  <rect width="2480" height="3508" fill="url(#bg)"/>
+  <circle cx="2260" cy="310" r="520" fill="#acd43c" opacity=".13"/>
+  <circle cx="-130" cy="3290" r="540" fill="#087d65" opacity=".08"/>
+
+  <rect x="120" y="110" width="2240" height="890" rx="70" fill="url(#hero)"/>
+  <rect x="120" y="110" width="2240" height="890" rx="70" fill="url(#dots)"/>
+  <rect x="195" y="185" width="480" height="230" rx="34" fill="#fff"/>
+  <image href="../logo-sertania.png" x="240" y="215" width="390" height="175" preserveAspectRatio="xMidYMid meet"/>
+  <text x="735" y="260" fill="#d8eee7" font-family="Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="6">PREFEITURA DE SERTÂNIA</text>
+  <text x="735" y="335" fill="#fff" font-family="Arial, sans-serif" font-size="62" font-weight="800">UBSF NOVA SERTÂNIA</text>
+  <line x1="195" y1="470" x2="2285" y2="470" stroke="#fff" opacity=".18" stroke-width="3"/>
+  <text x="195" y="620" fill="#b9dd35" font-family="Arial, sans-serif" font-size="48" font-weight="800" letter-spacing="8">AVISO IMPORTANTE</text>
+  <text x="195" y="760" fill="#fff" font-family="Arial, sans-serif" font-size="115" font-weight="900">RENOVAÇÃO</text>
+  <text x="195" y="885" fill="#fff" font-family="Arial, sans-serif" font-size="115" font-weight="900">DE RECEITAS</text>
+  <g transform="translate(1890 590)">
+    <circle cx="160" cy="160" r="160" fill="#fff" opacity=".12"/>
+    <rect x="65" y="55" width="190" height="230" rx="20" fill="#fff"/>
+    <rect x="110" y="30" width="100" height="48" rx="18" fill="#b9dd35"/>
+    <path d="M105 135h110M105 180h110M105 225h65" stroke="#087d65" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="208" cy="226" r="45" fill="#ffcf5a"/><path d="M187 226l15 15 30-35" fill="none" stroke="#064e43" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="1240" y="1175" text-anchor="middle" fill="#173c3d" font-family="Arial, sans-serif" font-size="62" font-weight="800">COMO FUNCIONA?</text>
+  <text x="1240" y="1255" text-anchor="middle" fill="#607b79" font-family="Arial, sans-serif" font-size="40">Confira os dias para deixar e retirar suas receitas.</text>
+
+  <g>
+    <rect x="150" y="1370" width="2180" height="430" rx="52" fill="#fff"/>
+    <circle cx="410" cy="1585" r="132" fill="#e8f5f0"/>
+    <path d="M350 1510h120a24 24 0 0 1 24 24v135a24 24 0 0 1-24 24H350a24 24 0 0 1-24-24v-135a24 24 0 0 1 24-24z" fill="#087d65"/>
+    <path d="M326 1560h168M370 1485v55M450 1485v55" stroke="#fff" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="370" cy="1610" r="12" fill="#b9dd35"/><circle cx="450" cy="1610" r="12" fill="#b9dd35"/><circle cx="410" cy="1650" r="12" fill="#b9dd35"/>
+    <rect x="620" y="1435" width="490" height="68" rx="34" fill="#e8f5f0"/><text x="865" y="1482" text-anchor="middle" fill="#087d65" font-family="Arial, sans-serif" font-size="34" font-weight="800" letter-spacing="3">DURANTE A SEMANA</text>
+    <text x="620" y="1602" fill="#173c3d" font-family="Arial, sans-serif" font-size="61" font-weight="800">Deixe suas receitas</text>
+    <text x="620" y="1682" fill="#607b79" font-family="Arial, sans-serif" font-size="42">na recepção da UBSF.</text>
+    <circle cx="2170" cy="1460" r="55" fill="#087d65"/><text x="2170" y="1480" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="54" font-weight="900">1</text>
+  </g>
+
+  <path d="M1240 1800v105" stroke="#8fc5b6" stroke-width="10" stroke-linecap="round" stroke-dasharray="1 28"/>
+  <g>
+    <rect x="150" y="1905" width="2180" height="430" rx="52" fill="#fff"/>
+    <circle cx="410" cy="2120" r="132" fill="#fff5d8"/>
+    <circle cx="410" cy="2120" r="83" fill="none" stroke="#e3aa26" stroke-width="20"/><path d="M410 2072v55l42 28" fill="none" stroke="#064e43" stroke-width="20" stroke-linecap="round"/>
+    <rect x="620" y="1970" width="370" height="68" rx="34" fill="#fff5d8"/><text x="805" y="2017" text-anchor="middle" fill="#a66c00" font-family="Arial, sans-serif" font-size="34" font-weight="800" letter-spacing="3">SEGUNDA-FEIRA</text>
+    <text x="620" y="2137" fill="#173c3d" font-family="Arial, sans-serif" font-size="61" font-weight="800">As receitas serão renovadas</text>
+    <text x="620" y="2217" fill="#607b79" font-family="Arial, sans-serif" font-size="42">pela equipe responsável.</text>
+    <circle cx="2170" cy="1995" r="55" fill="#e3aa26"/><text x="2170" y="2015" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="54" font-weight="900">2</text>
+  </g>
+
+  <path d="M1240 2335v105" stroke="#8fc5b6" stroke-width="10" stroke-linecap="round" stroke-dasharray="1 28"/>
+  <g>
+    <rect x="150" y="2440" width="2180" height="430" rx="52" fill="#fff"/>
+    <circle cx="410" cy="2655" r="132" fill="#e8f1f8"/>
+    <path d="M320 2625l90-65 90 65v115a22 22 0 0 1-22 22H342a22 22 0 0 1-22-22z" fill="#2d6b91"/><path d="M320 2625l90 70 90-70" fill="none" stroke="#fff" stroke-width="18" stroke-linejoin="round"/>
+    <rect x="620" y="2505" width="335" height="68" rx="34" fill="#e8f1f8"/><text x="788" y="2552" text-anchor="middle" fill="#2d6b91" font-family="Arial, sans-serif" font-size="34" font-weight="800" letter-spacing="3">TERÇA-FEIRA</text>
+    <text x="620" y="2672" fill="#173c3d" font-family="Arial, sans-serif" font-size="61" font-weight="800">Retire sua receita renovada</text>
+    <text x="620" y="2752" fill="#607b79" font-family="Arial, sans-serif" font-size="42">na recepção da unidade.</text>
+    <circle cx="2170" cy="2530" r="55" fill="#2d6b91"/><text x="2170" y="2550" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="54" font-weight="900">3</text>
+  </g>
+
+  <rect x="150" y="3025" width="2180" height="315" rx="58" fill="#064e43"/>
+  <circle cx="350" cy="3182" r="92" fill="#b9dd35"/><path d="M305 3180l30 30 65-76" fill="none" stroke="#064e43" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="510" y="3160" fill="#fff" font-family="Arial, sans-serif" font-size="60" font-weight="800">Agradecemos a compreensão</text>
+  <text x="510" y="3235" fill="#d8eee7" font-family="Arial, sans-serif" font-size="42">e a colaboração de todos!</text>
+  <text x="1240" y="3450" text-anchor="middle" fill="#607b79" font-family="Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="3">CUIDAR DE VOCÊ É A NOSSA PRIORIDADE</text>
+</svg>
