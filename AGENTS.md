@@ -16,3 +16,11 @@
   para rótulos operacionais, aumentando sempre que houver espaço.
 - Validar as artes de saúde em A4 real e em prévia reduzida. Manter o layout
   elegante e editável sem sacrificar a compreensão das orientações.
+- Usar o aviso de renovação de receitas da UBSF Nova Sertânia como perfil visual
+  de referência para novos avisos da saúde: letras grandes sempre que possível,
+  informações importantes fortemente destacadas e hierarquia imediatamente
+  compreensível.
+- Aproveitar ao máximo a área útil para ampliar títulos, dias, períodos e textos
+  explicativos. Levar a tipografia ao maior tamanho que o layout comporte com
+  equilíbrio, margens seguras e boa aparência, evitando espaços ociosos, cortes,
+  sobreposições ou composição apertada.
