@@ -4,21 +4,30 @@ import {filterEmployees,MONTHS,sortEmployees} from './model.js';
 import {generateAttendancePdf} from './pdf.js';
 
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-const state={session:null,employees:[],units:[],history:[],selected:new Set(),pdf:null,pdfUrl:null,busy:false};
-const NOTICES=[{title:'Renovação de receitas',description:'Orientações sobre entrega, renovação e retirada de receitas na UBSF Nova Sertânia.',image:'assets/avisos/renovacao-de-receitas.png',pdf:'assets/avisos/renovacao-de-receitas.pdf',canva:'https://www.canva.com/d/szDFoM-Jyf3gA-m',format:'A4 retrato'}];
+const FALLBACK_NOTICE={title:'Renovação de receitas',description:'Orientações sobre entrega, renovação e retirada de receitas na UBSF Nova Sertânia.',image:'assets/avisos/renovacao-de-receitas.png',pdf:'assets/avisos/renovacao-de-receitas.pdf',canva:'https://www.canva.com/d/szDFoM-Jyf3gA-m',format:'A4 retrato'};
+const state={session:null,employees:[],units:[],history:[],notice:FALLBACK_NOTICE,canvaSync:null,selected:new Set(),pdf:null,pdfUrl:null,busy:false};
 const $=selector=>document.querySelector(selector);const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(message,type='success'){const item=document.createElement('div');item.className='toast '+type;item.textContent=message;$('#toast').append(item);setTimeout(()=>item.remove(),4200);}
 function usernameEmail(username){return `${String(username).trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')}@${LOGIN_DOMAIN}`;}
 function showLogin(){state.session=null;$('#loading').hidden=true;$('#app-view').hidden=true;$('#login-view').hidden=false;$('#login-user').focus();}
-function showApp(){$('#loading').hidden=true;$('#login-view').hidden=true;$('#app-view').hidden=false;$('#current-user').textContent=state.session.user.user_metadata?.username||'RWXV';route();}
+function showApp(){$('#loading').hidden=true;$('#login-view').hidden=true;$('#app-view').hidden=false;$('#current-user').textContent=state.session.user.user_metadata?.username||'RWXV';route();handleCanvaReturn();}
+function noticeFromRow(row){
+ if(!row||!Number(row.version))return FALLBACK_NOTICE;
+ const root=`${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(row.storage_bucket)}`;
+ const version=encodeURIComponent(row.version);
+ return {title:row.title,description:row.description,format:row.format,canva:row.canva_edit_url,image:`${root}/${row.image_path}?v=${version}`,pdf:`${root}/${row.pdf_path}?v=${version}`};
+}
 async function loadData(){
- const [employees,units,history]=await Promise.all([
+ const [employees,units,history,notice,canvaSync]=await Promise.all([
   supabase.from('fp_employees').select('*,unit:fp_units(*)').order('name'),
   supabase.from('fp_units').select('*').order('name'),
-  supabase.from('fp_generation_logs').select('*').order('created_at',{ascending:false}).limit(80)
+  supabase.from('fp_generation_logs').select('*').order('created_at',{ascending:false}).limit(80),
+  supabase.from('fp_notice_assets').select('*').eq('id','renovacao-receitas').maybeSingle(),
+  supabase.functions.invoke('canva-sync',{body:{action:'status'}})
  ]);
- for(const result of [employees,units,history])if(result.error)throw result.error;
+ for(const result of [employees,units,history,notice])if(result.error)throw result.error;
  state.employees=employees.data||[];state.units=units.data||[];state.history=history.data||[];
+ state.notice=noticeFromRow(notice.data);state.canvaSync=canvaSync.error?{error:canvaSync.error.message}:canvaSync.data;
  state.selected=new Set([...state.selected].filter(id=>state.employees.some(e=>e.id===id&&e.active)));
 }
 async function boot(){
@@ -32,11 +41,45 @@ function pageHeader(kicker,title,description,action=''){return `<header class="p
 function selectOptions(list,value,label='name'){return list.map(item=>`<option value="${esc(item.id)}" ${item.id===value?'selected':''}>${esc(item[label])}</option>`).join('');}
 function monthControls(){const now=new Date(),month=Number(sessionStorage.getItem('fp-month')||now.getMonth()+1),year=Number(sessionStorage.getItem('fp-year')||now.getFullYear());return {month,year};}
 function renderHome(){
- const active=state.employees.filter(e=>e.active).length;
- $('#workspace').innerHTML=`${pageHeader('UBSF NOVA SERTÂNIA','Serviços da unidade','Acesse documentos, cadastros e materiais de comunicação em um só lugar.',`<div class="header-stats"><b>${active}<small>colaboradores</small></b><b>${NOTICES.length}<small>aviso disponível</small></b></div>`)}<section class="service-grid"><a class="service-card featured" href="#gerar"><span class="service-icon">▣</span><small>GESTÃO DE FREQUÊNCIA</small><h2>Folha de ponto</h2><p>Gere folhas individuais ou um único PDF com os colaboradores selecionados.</p><b>Acessar serviço →</b></a><a class="service-card" href="#avisos"><span class="service-icon blue">◫</span><small>COMUNICAÇÃO</small><h2>Avisos para impressão</h2><p>Visualize e baixe as artes oficiais da unidade em PDF A4.</p><b>Ver materiais →</b></a><a class="service-card" href="#colaboradores"><span class="service-icon amber">♙</span><small>CADASTRO FUNCIONAL</small><h2>Colaboradores</h2><p>Mantenha nomes, cargos, situações e unidades sempre atualizados.</p><b>Gerenciar cadastros →</b></a></section><section class="home-highlight"><div><span class="eyebrow">NOVO MATERIAL</span><h2>Renovação de receitas</h2><p>A nova arte está pronta para impressão em A4 e também disponível para edição no Canva.</p><div><a class="primary" href="#avisos">Visualizar aviso</a><a class="secondary" href="${NOTICES[0].pdf}" download>Baixar PDF</a></div></div><img src="${NOTICES[0].image}" alt="Prévia do aviso sobre renovação de receitas"></section>`;
+ const active=state.employees.filter(e=>e.active).length,notice=state.notice;
+ $('#workspace').innerHTML=`${pageHeader('UBSF NOVA SERTÂNIA','Serviços da unidade','Acesse documentos, cadastros e materiais de comunicação em um só lugar.',`<div class="header-stats"><b>${active}<small>colaboradores</small></b><b>1<small>aviso disponível</small></b></div>`)}<section class="service-grid"><a class="service-card featured" href="#gerar"><span class="service-icon">▣</span><small>GESTÃO DE FREQUÊNCIA</small><h2>Folha de ponto</h2><p>Gere folhas individuais ou um único PDF com os colaboradores selecionados.</p><b>Acessar serviço →</b></a><a class="service-card" href="#avisos"><span class="service-icon blue">◫</span><small>COMUNICAÇÃO</small><h2>Avisos para impressão</h2><p>Visualize e baixe as artes oficiais da unidade em PDF A4.</p><b>Ver materiais →</b></a><a class="service-card" href="#colaboradores"><span class="service-icon amber">♙</span><small>CADASTRO FUNCIONAL</small><h2>Colaboradores</h2><p>Mantenha nomes, cargos, situações e unidades sempre atualizados.</p><b>Gerenciar cadastros →</b></a></section><section class="home-highlight"><div><span class="eyebrow">NOVO MATERIAL</span><h2>Renovação de receitas</h2><p>A nova arte está pronta para impressão em A4 e também disponível para edição no Canva.</p><div><a class="primary" href="#avisos">Visualizar aviso</a><a class="secondary" href="${notice.pdf}" download>Baixar PDF</a></div></div><img src="${notice.image}" alt="Prévia do aviso sobre renovação de receitas"></section>`;
 }
 function renderNotices(){
- $('#workspace').innerHTML=`${pageHeader('MATERIAIS DA UNIDADE','Avisos para impressão','Artes oficiais em PDF A4, prontas para baixar, imprimir ou editar no Canva.') }<section class="notice-grid">${NOTICES.map(notice=>`<article class="notice-card"><div class="notice-preview"><img src="${notice.image}" alt="${esc(notice.title)}"><span>${esc(notice.format)}</span></div><div class="notice-content"><span class="eyebrow">AVISO À COMUNIDADE</span><h2>${esc(notice.title)}</h2><p>${esc(notice.description)}</p><div class="notice-actions"><a class="primary" href="${notice.pdf}" download>↓ Baixar PDF</a><a class="secondary" href="${notice.pdf}" target="_blank" rel="noopener">Visualizar</a><a class="canva-button" href="${notice.canva}" target="_blank" rel="noopener">Editar no Canva</a></div></div></article>`).join('')}</section>`;
+ const notice=state.notice,sync=state.canvaSync||{},connected=Boolean(sync.connected),configured=Boolean(sync.configured);
+ const syncLabel=connected?(sync.sync_status==='error'?'A sincronização precisa de atenção':'Sincronização automática ativa'):(configured?'Autorização do Canva pendente':'Configuração inicial do Canva');
+ const syncDescription=connected?(sync.last_sync_at?`Última verificação: ${new Date(sync.last_sync_at).toLocaleString('pt-BR')}. O site verifica alterações a cada minuto.`:'O Canva está conectado e a primeira sincronização será executada automaticamente.'):'Conecte o projeto uma única vez para atualizar imagem e PDF automaticamente.';
+ const syncAction=connected?'<button class="secondary compact" id="canva-sync-now">↻ Sincronizar agora</button>':configured?'<button class="canva-button compact" id="canva-authorize">Autorizar no Canva</button>':'<button class="primary compact" id="canva-setup">Configurar integração</button>';
+ $('#workspace').innerHTML=`${pageHeader('MATERIAIS DA UNIDADE','Avisos para impressão','Artes oficiais em PDF A4, prontas para baixar, imprimir ou editar no Canva.') }<section class="notice-grid"><article class="notice-card"><div class="notice-preview"><img src="${notice.image}" alt="${esc(notice.title)}"><span>${esc(notice.format)}</span></div><div class="notice-content"><span class="eyebrow">AVISO À COMUNIDADE</span><h2>${esc(notice.title)}</h2><p>${esc(notice.description)}</p><div class="notice-actions"><a class="primary" href="${notice.pdf}" download>↓ Baixar PDF</a><a class="secondary" href="${notice.pdf}" target="_blank" rel="noopener">Visualizar</a><a class="canva-button" href="${notice.canva}" target="_blank" rel="noopener">Editar no Canva</a></div></div></article><article class="canva-sync-panel ${connected?'connected':''}"><span class="sync-icon">${connected?'✓':'↻'}</span><div><small>CANVA + SITE</small><h3>${esc(syncLabel)}</h3><p>${esc(syncDescription)}</p>${sync.last_error?`<em>${esc(sync.last_error)}</em>`:''}</div><div>${syncAction}</div></article></section>`;
+ $('#canva-setup')?.addEventListener('click',openCanvaSetup);
+ $('#canva-authorize')?.addEventListener('click',startCanvaAuthorization);
+ $('#canva-sync-now')?.addEventListener('click',syncCanvaNow);
+}
+async function invokeCanva(action,payload={}){
+ const {data,error}=await supabase.functions.invoke('canva-sync',{body:{action,...payload}});
+ if(error)throw new Error(data?.error||error.message);
+ if(data?.error)throw new Error(data.error);
+ return data;
+}
+async function startCanvaAuthorization(){
+ const button=$('#canva-authorize');if(button){button.disabled=true;button.textContent='Abrindo o Canva…';}
+ try{const result=await invokeCanva('authorize');location.href=result.authorization_url;}catch(error){toast(error.message,'error');if(button){button.disabled=false;button.textContent='Autorizar no Canva';}}
+}
+function openCanvaSetup(){
+ const redirect=state.canvaSync?.redirect_uri||`${SUPABASE_URL}/functions/v1/canva-sync/callback`;
+ openModal('INTEGRAÇÃO SEGURA','Conectar o site ao Canva','Cadastre uma integração no Canva Developer Portal e autorize somente a leitura e exportação da arte.',`<form id="canva-setup-form"><div class="setup-guide"><b>Configuração única</b><ol><li>Abra o <a href="https://www.canva.com/developers/apps" target="_blank" rel="noopener">Canva Developer Portal</a> e crie uma integração.</li><li>Em <strong>Outside Canva</strong>, ative as APIs REST e as permissões <code>design:meta:read</code> e <code>design:content:read</code>.</li><li>Cadastre exatamente esta URL de retorno:</li></ol><div class="copy-field"><input id="canva-redirect" readonly value="${esc(redirect)}"><button type="button" class="secondary compact" id="copy-canva-redirect">Copiar</button></div></div><div class="form-grid"><label class="span-2">Client ID<input id="canva-client-id" required autocomplete="off" placeholder="Identificador fornecido pelo Canva"></label><label class="span-2">Client secret<input id="canva-client-secret" type="password" required autocomplete="new-password" placeholder="Segredo gerado uma única vez no Canva"></label></div><p class="security-note">O segredo será enviado diretamente ao Vault criptografado do Supabase e não será salvo no navegador nem no GitHub.</p><div class="modal-actions"><button type="button" class="secondary" data-close>Cancelar</button><button type="submit" class="primary">Salvar e autorizar</button></div></form>`);
+ $('#copy-canva-redirect').onclick=async()=>{await navigator.clipboard.writeText(redirect);toast('URL de retorno copiada.');};
+ $('#canva-setup-form').onsubmit=async event=>{event.preventDefault();const button=event.submitter;button.disabled=true;button.textContent='Protegendo credenciais…';try{await invokeCanva('configure',{client_id:$('#canva-client-id').value.trim(),client_secret:$('#canva-client-secret').value.trim()});closeModal();await startCanvaAuthorization();}catch(error){toast(error.message,'error');button.disabled=false;button.textContent='Salvar e autorizar';}};
+}
+async function syncCanvaNow(){
+ const button=$('#canva-sync-now');if(button){button.disabled=true;button.textContent='Sincronizando…';}
+ try{const result=await invokeCanva('sync');await loadData();renderNotices();toast(result.changed?'Arte e PDF atualizados com o Canva.':'A arte do site já estava atualizada.');}catch(error){toast(error.message,'error');if(button){button.disabled=false;button.textContent='↻ Sincronizar agora';}}
+}
+function handleCanvaReturn(){
+ const result=new URLSearchParams(location.search).get('canva');if(!result)return;
+ history.replaceState({},'',`${location.pathname}${location.hash||'#avisos'}`);
+ if(result==='connected')toast('Canva autorizado e primeira sincronização concluída.');
+ else if(result==='expired')toast('A autorização expirou antes de ser concluída. Tente novamente.','error');
+ else toast('Não foi possível concluir a autorização do Canva.','error');
 }
 function renderGenerator(){
  const {month,year}=monthControls(),active=sortEmployees(state.employees.filter(e=>e.active));

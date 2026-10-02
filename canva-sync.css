@@ -1,0 +1,130 @@
+.canva-button.compact {
+  border: 0;
+  cursor: pointer;
+}
+
+.canva-sync-panel {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgba(18, 60, 65, .04);
+}
+
+.canva-sync-panel.connected {
+  border-color: #a7d9cd;
+  background: linear-gradient(135deg, #f7fffc, #edf9f5);
+}
+
+.sync-icon {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  background: #eee6fb;
+  color: #7d2ae8;
+  font-size: 21px;
+  font-weight: 900;
+}
+
+.connected .sync-icon {
+  background: #d9f4e9;
+  color: #078062;
+}
+
+.canva-sync-panel small {
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.canva-sync-panel h3 {
+  margin: 3px 0 2px;
+  font-size: 17px;
+}
+
+.canva-sync-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.canva-sync-panel em {
+  display: block;
+  margin-top: 5px;
+  color: #a52727;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.setup-guide {
+  margin-bottom: 20px;
+  padding: 17px;
+  background: #f1f7f5;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+}
+
+.setup-guide > b,
+.setup-guide a {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.setup-guide ol {
+  margin: 10px 0 13px;
+  padding-left: 20px;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.setup-guide code {
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: #e1ece9;
+  color: #164b45;
+}
+
+.copy-field {
+  display: flex;
+  gap: 7px;
+}
+
+.copy-field input {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.security-note {
+  margin: 13px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 760px) {
+  .canva-sync-panel {
+    grid-template-columns: auto 1fr;
+  }
+
+  .canva-sync-panel > div:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .canva-sync-panel button {
+    width: 100%;
+  }
+
+  .copy-field {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
