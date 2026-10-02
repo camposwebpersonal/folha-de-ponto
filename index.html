@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#063f37">
+  <meta name="description" content="Geração de folhas individuais de frequência da Prefeitura de Sertânia">
+  <title>Folha de Ponto — Prefeitura de Sertânia</title>
+  <link rel="icon" href="assets/logo-sertania.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css?v=1">
+  <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+</head>
+<body>
+  <div id="loading" class="loading-screen"><div class="spinner"></div><span>Preparando o sistema…</span></div>
+
+  <main id="login-view" class="login-view" hidden>
+    <section class="login-brand">
+      <img src="assets/logo-sertania.png" alt="Prefeitura de Sertânia">
+      <div><span>Prefeitura de Sertânia</span><strong>Folha de Ponto</strong><p>Folhas de frequência organizadas, prontas para imprimir.</p></div>
+    </section>
+    <section class="login-card" aria-labelledby="login-title">
+      <span class="eyebrow">ACESSO RESTRITO</span>
+      <h1 id="login-title">Bem-vindo</h1>
+      <p>Entre com seu usuário administrativo para continuar.</p>
+      <form id="login-form">
+        <label for="login-user">Usuário</label>
+        <div class="input-shell"><span>◎</span><input id="login-user" autocomplete="username" required maxlength="40" placeholder="Seu usuário"></div>
+        <label for="login-password">Senha</label>
+        <div class="input-shell"><span>⌁</span><input id="login-password" type="password" autocomplete="current-password" required placeholder="Sua senha"><button type="button" id="toggle-password" aria-label="Mostrar senha">◉</button></div>
+        <button class="primary wide" type="submit" id="login-submit">Entrar no sistema</button>
+        <div id="login-error" class="form-error" role="alert"></div>
+      </form>
+      <small>Ambiente protegido pelo Supabase Auth</small>
+    </section>
+  </main>
+
+  <div id="app-view" class="app-shell" hidden>
+    <header class="topbar">
+      <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">☰</button>
+      <a class="brand" href="#gerar"><img src="assets/logo-sertania.png" alt=""><span><strong>Folha de Ponto</strong><small>Prefeitura de Sertânia</small></span></a>
+      <div class="topbar-spacer"></div>
+      <div class="user-chip"><span class="avatar">R</span><span><strong>Administrador</strong><small id="current-user">Sessão ativa</small></span></div>
+      <button class="logout-button" id="logout-button">Sair</button>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-label">GESTÃO DE FREQUÊNCIA</div>
+      <nav>
+        <a href="#gerar" data-route="gerar"><span>▣</span><div><strong>Gerar folhas</strong><small>Individual ou unificada</small></div></a>
+        <a href="#colaboradores" data-route="colaboradores"><span>♙</span><div><strong>Colaboradores</strong><small>Cadastro funcional</small></div></a>
+        <a href="#unidades" data-route="unidades"><span>▥</span><div><strong>Unidades e setores</strong><small>Locais de trabalho</small></div></a>
+        <a href="#historico" data-route="historico"><span>◷</span><div><strong>Histórico</strong><small>PDFs gerados</small></div></a>
+      </nav>
+      <div class="sidebar-note"><i></i><span>Banco conectado<br><small>Dados protegidos</small></span></div>
+    </aside>
+    <button class="sidebar-backdrop" id="sidebar-backdrop" aria-label="Fechar menu"></button>
+
+    <section class="workspace" id="workspace"></section>
+  </div>
+
+  <div id="modal" class="modal-overlay" hidden>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <header><div><span class="eyebrow" id="modal-kicker">CADASTRO</span><h2 id="modal-title"></h2><p id="modal-subtitle"></p></div><button id="modal-close" aria-label="Fechar">×</button></header>
+      <div id="modal-body"></div>
+    </section>
+  </div>
+
+  <div id="pdf-preview" class="preview-overlay" hidden>
+    <section class="preview-card">
+      <header><div><span class="eyebrow">PRÉ-VISUALIZAÇÃO</span><h2 id="preview-title">Folha de frequência</h2></div><div><button class="secondary" id="preview-close">Fechar</button><button class="primary" id="preview-download">Baixar PDF</button></div></header>
+      <iframe id="preview-frame" title="Pré-visualização do PDF"></iframe>
+    </section>
+  </div>
+
+  <div id="toast" class="toast-region" aria-live="polite"></div>
+  <script type="module" src="js/app.js?v=1"></script>
+</body>
+</html>
+

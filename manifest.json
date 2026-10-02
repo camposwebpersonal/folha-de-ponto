@@ -1,0 +1,9 @@
+{
+  "name": "Folha de Ponto — Prefeitura de Sertânia",
+  "short_name": "Folha de Ponto",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f2f6f7",
+  "theme_color": "#063f37",
+  "icons": [{"src":"assets/logo-sertania.png","sizes":"any","type":"image/png","purpose":"any maskable"}]
+}
