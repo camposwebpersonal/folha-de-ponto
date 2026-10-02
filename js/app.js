@@ -5,7 +5,7 @@ import {generateAttendancePdf} from './pdf.js';
 
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 const state={session:null,employees:[],units:[],history:[],selected:new Set(),pdf:null,pdfUrl:null,busy:false};
-const NOTICES=[{title:'Renovação de receitas',description:'Orientações sobre entrega, renovação e retirada de receitas na UBSF Nova Sertânia.',image:'assets/avisos/renovacao-de-receitas.png',pdf:'assets/avisos/renovacao-de-receitas.pdf',canva:'https://www.canva.com/d/NsHnyBW79MKNyRI',format:'A4 retrato'}];
+const NOTICES=[{title:'Renovação de receitas',description:'Orientações sobre entrega, renovação e retirada de receitas na UBSF Nova Sertânia.',image:'assets/avisos/renovacao-de-receitas.png',pdf:'assets/avisos/renovacao-de-receitas.pdf',canva:'https://www.canva.com/d/f3P56QzCsKncBJX',format:'A4 retrato'}];
 const $=selector=>document.querySelector(selector);const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(message,type='success'){const item=document.createElement('div');item.className='toast '+type;item.textContent=message;$('#toast').append(item);setTimeout(()=>item.remove(),4200);}
 function usernameEmail(username){return `${String(username).trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')}@${LOGIN_DOMAIN}`;}

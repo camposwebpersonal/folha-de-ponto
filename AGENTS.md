@@ -9,4 +9,10 @@
   destaque de sábados e domingos.
 - Preservar autenticação real no Supabase; nunca substituir por senha gravada no
   JavaScript do navegador.
-
+- Em artes para postos e unidades de saúde, priorizar leitura imediata inclusive
+  à distância e por pessoas idosas ou com baixa visão. Dias, datas, horários,
+  etapas e descrições devem usar tipografia grande, em negrito e com alto
+  contraste. Em A4, adotar como referência mínima 13 pt para explicações e 14 pt
+  para rótulos operacionais, aumentando sempre que houver espaço.
+- Validar as artes de saúde em A4 real e em prévia reduzida. Manter o layout
+  elegante e editável sem sacrificar a compreensão das orientações.
