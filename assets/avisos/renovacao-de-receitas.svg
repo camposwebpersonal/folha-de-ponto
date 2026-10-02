@@ -35,7 +35,7 @@
     <path d="M350 1510h120a24 24 0 0 1 24 24v135a24 24 0 0 1-24 24H350a24 24 0 0 1-24-24v-135a24 24 0 0 1 24-24z" fill="#087d65"/>
     <path d="M326 1560h168M370 1485v55M450 1485v55" stroke="#fff" stroke-width="18" stroke-linecap="round"/>
     <circle cx="370" cy="1610" r="12" fill="#b9dd35"/><circle cx="450" cy="1610" r="12" fill="#b9dd35"/><circle cx="410" cy="1650" r="12" fill="#b9dd35"/>
-    <rect x="620" y="1415" width="780" height="108" rx="54" fill="#dff2eb"/><text x="1010" y="1489" text-anchor="middle" fill="#087d65" font-family="Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="2">DURANTE A SEMANA</text>
+    <rect x="620" y="1405" width="920" height="126" rx="63" fill="#dff2eb"/><text x="1080" y="1492" text-anchor="middle" fill="#087d65" font-family="Arial, sans-serif" font-size="76" font-weight="900" letter-spacing="2">DURANTE A SEMANA</text>
     <text x="620" y="1628" fill="#173c3d" font-family="Arial, sans-serif" font-size="82" font-weight="900">Deixe suas receitas</text>
     <text x="620" y="1725" fill="#526f6d" font-family="Arial, sans-serif" font-size="68" font-weight="700">na recepção da UBSF.</text>
     <circle cx="2170" cy="1460" r="55" fill="#087d65"/><text x="2170" y="1480" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="54" font-weight="900">1</text>
@@ -46,7 +46,7 @@
     <rect x="150" y="1905" width="2180" height="430" rx="52" fill="#fff"/>
     <circle cx="410" cy="2120" r="132" fill="#fff5d8"/>
     <circle cx="410" cy="2120" r="83" fill="none" stroke="#e3aa26" stroke-width="20"/><path d="M410 2072v55l42 28" fill="none" stroke="#064e43" stroke-width="20" stroke-linecap="round"/>
-    <rect x="620" y="1950" width="620" height="108" rx="54" fill="#fff0c9"/><text x="930" y="2024" text-anchor="middle" fill="#9b6500" font-family="Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="2">SEGUNDA-FEIRA</text>
+    <rect x="620" y="1940" width="720" height="126" rx="63" fill="#fff0c9"/><text x="980" y="2027" text-anchor="middle" fill="#9b6500" font-family="Arial, sans-serif" font-size="76" font-weight="900" letter-spacing="2">SEGUNDA-FEIRA</text>
     <text x="620" y="2163" fill="#173c3d" font-family="Arial, sans-serif" font-size="82" font-weight="900">As receitas serão renovadas</text>
     <text x="620" y="2260" fill="#526f6d" font-family="Arial, sans-serif" font-size="68" font-weight="700">pela equipe responsável.</text>
     <circle cx="2170" cy="1995" r="55" fill="#e3aa26"/><text x="2170" y="2015" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="54" font-weight="900">2</text>
@@ -57,7 +57,7 @@
     <rect x="150" y="2440" width="2180" height="430" rx="52" fill="#fff"/>
     <circle cx="410" cy="2655" r="132" fill="#e8f1f8"/>
     <path d="M320 2625l90-65 90 65v115a22 22 0 0 1-22 22H342a22 22 0 0 1-22-22z" fill="#2d6b91"/><path d="M320 2625l90 70 90-70" fill="none" stroke="#fff" stroke-width="18" stroke-linejoin="round"/>
-    <rect x="620" y="2485" width="570" height="108" rx="54" fill="#dfeef7"/><text x="905" y="2559" text-anchor="middle" fill="#2d6b91" font-family="Arial, sans-serif" font-size="64" font-weight="900" letter-spacing="2">TERÇA-FEIRA</text>
+    <rect x="620" y="2475" width="660" height="126" rx="63" fill="#dfeef7"/><text x="950" y="2562" text-anchor="middle" fill="#2d6b91" font-family="Arial, sans-serif" font-size="76" font-weight="900" letter-spacing="2">TERÇA-FEIRA</text>
     <text x="620" y="2698" fill="#173c3d" font-family="Arial, sans-serif" font-size="82" font-weight="900">Retire sua receita renovada</text>
     <text x="620" y="2795" fill="#526f6d" font-family="Arial, sans-serif" font-size="68" font-weight="700">na recepção da unidade.</text>
     <circle cx="2170" cy="2530" r="55" fill="#2d6b91"/><text x="2170" y="2550" text-anchor="middle" fill="#fff" font-family="Arial, sans-serif" font-size="54" font-weight="900">3</text>
