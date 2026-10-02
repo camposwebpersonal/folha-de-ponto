@@ -24,3 +24,11 @@
   explicativos. Levar a tipografia ao maior tamanho que o layout comporte com
   equilíbrio, margens seguras e boa aparência, evitando espaços ociosos, cortes,
   sobreposições ou composição apertada.
+- Manter cada trabalho e versão dentro de uma pasta de destino definida. Quando
+  uma nova arte substituir outra no Canva, preservar a anterior até conferir a
+  substituta e então movê-la para uma subpasta `BKP` dentro da própria pasta de
+  origem. Nunca deixar versões descartadas soltas na raiz ou em Projetos.
+- A pasta principal deve conter somente a versão atual aprovada e a subpasta
+  `BKP`; versões anteriores e rascunhos substituídos ficam organizados no backup.
+  Aplicar o mesmo princípio de organização a todos os arquivos e plataformas.
+- Princípio permanente: “Quem é organizado trabalha menos e produz mais.”
