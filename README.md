@@ -28,12 +28,18 @@ Supabase Cron. O Client ID e o Client secret são cadastrados pela área
 administrativa do próprio site e armazenados de forma criptografada no Supabase
 Vault.
 
-Na integração criada no Canva Developer Portal, habilite as permissões
-`design:meta:read` e `design:content:read` e cadastre a URL de retorno:
+No Canva Developer Portal, crie o aplicativo público `UBSF Sync`, acesse
+**Outside Canva**, inicie a integração e mantenha as APIs REST ativadas. Gere o
+Client secret, habilite as permissões `design:meta:read` e
+`design:content:read` e cadastre a URL de retorno:
 
 ```text
 https://xwlmpxypjheuhbxyfplo.supabase.co/functions/v1/canva-sync/callback
 ```
+
+Na área **Avisos** do portal, use **Configurar integração** para salvar o Client
+ID e o Client secret diretamente no Vault do Supabase e concluir a autorização
+OAuth. O segredo não deve ser incluído no repositório.
 
 ## Desenvolvimento local
 
