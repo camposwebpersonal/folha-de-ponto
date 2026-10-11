@@ -11,6 +11,8 @@ um dos módulos do portal, ao lado da biblioteca de avisos para impressão.
 - geração mensal em A4, uma página por colaborador;
 - pré-visualização antes do download;
 - histórico de documentos gerados;
+- contador persistente das pendências de ultrassom da UBSF Nova Sertânia, com
+  cópia das 12 quantidades na ordem da planilha;
 - biblioteca de avisos oficiais em PDF A4, com acesso à versão editável no Canva;
 - sincronização automática da arte e do PDF do Canva a cada minuto;
 - banco protegido por Row Level Security (RLS).

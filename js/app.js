@@ -2,10 +2,13 @@ import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.49.0';
 import {LOGIN_DOMAIN,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL} from './config.js';
 import {filterEmployees,MONTHS,sortEmployees} from './model.js';
 import {generateAttendancePdf} from './pdf.js';
+import {ULTRASOUND_TYPES,changeUltrasoundCount,emptyUltrasoundCounts,normalizeUltrasoundCounts,ultrasoundSpreadsheetRow,ultrasoundTotal} from './ultrasound-counter.js';
 
 const supabase=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 const FALLBACK_NOTICE={title:'Renovação de receitas',description:'Orientações sobre entrega, renovação e retirada de receitas na UBSF Nova Sertânia.',image:'assets/avisos/renovacao-de-receitas.png',pdf:'assets/avisos/renovacao-de-receitas.pdf',canva:'https://www.canva.com/d/szDFoM-Jyf3gA-m',format:'A4 retrato'};
-const state={session:null,employees:[],units:[],history:[],notice:FALLBACK_NOTICE,canvaSync:null,selected:new Set(),pdf:null,pdfUrl:null,busy:false};
+const ULTRASOUND_ROW_ID='nova-sertania',ULTRASOUND_LOCAL_KEY='ubsf-ultrasound-counter-v1';
+const state={session:null,employees:[],units:[],history:[],notice:FALLBACK_NOTICE,canvaSync:null,ultrasound:{counts:emptyUltrasoundCounts(),updatedAt:null},selected:new Set(),pdf:null,pdfUrl:null,busy:false};
+let ultrasoundSaveTimer=null,ultrasoundSaveQueue=Promise.resolve();
 const $=selector=>document.querySelector(selector);const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function toast(message,type='success'){const item=document.createElement('div');item.className='toast '+type;item.textContent=message;$('#toast').append(item);setTimeout(()=>item.remove(),4200);}
 function usernameEmail(username){return `${String(username).trim().toLowerCase().replace(/[^a-z0-9._-]/g,'')}@${LOGIN_DOMAIN}`;}
@@ -18,16 +21,21 @@ function noticeFromRow(row){
  return {title:row.title,description:row.description,format:row.format,canva:row.canva_edit_url,image:`${root}/${row.image_path}?v=${version}`,pdf:`${root}/${row.pdf_path}?v=${version}`};
 }
 async function loadData(){
- const [employees,units,history,notice,canvaSync]=await Promise.all([
+ const [employees,units,history,notice,canvaSync,ultrasound]=await Promise.all([
   supabase.from('fp_employees').select('*,unit:fp_units(*)').order('name'),
   supabase.from('fp_units').select('*').order('name'),
   supabase.from('fp_generation_logs').select('*').order('created_at',{ascending:false}).limit(80),
   supabase.from('fp_notice_assets').select('*').eq('id','renovacao-receitas').maybeSingle(),
-  supabase.functions.invoke('canva-sync',{body:{action:'status'}})
+  supabase.functions.invoke('canva-sync',{body:{action:'status'}}),
+  supabase.from('fp_ultrasound_counters').select('*').eq('id',ULTRASOUND_ROW_ID).maybeSingle()
  ]);
- for(const result of [employees,units,history,notice])if(result.error)throw result.error;
+ for(const result of [employees,units,history,notice,ultrasound])if(result.error)throw result.error;
  state.employees=employees.data||[];state.units=units.data||[];state.history=history.data||[];
  state.notice=noticeFromRow(notice.data);state.canvaSync=canvaSync.error?{error:canvaSync.error.message}:canvaSync.data;
+ const local=readLocalUltrasound(),remote=ultrasound.data;
+ const useLocal=local&&(!remote||new Date(local.updatedAt||0)>new Date(remote.updated_at||0));
+ state.ultrasound={counts:normalizeUltrasoundCounts(useLocal?local.counts:remote?.counts),updatedAt:(useLocal?local.updatedAt:remote?.updated_at)||null};
+ if(useLocal)queueUltrasoundSave();
  state.selected=new Set([...state.selected].filter(id=>state.employees.some(e=>e.id===id&&e.active)));
 }
 async function boot(){
@@ -36,14 +44,47 @@ async function boot(){
 }
 function closeSidebar(){document.body.classList.remove('sidebar-open');}
 function setActiveNav(route){document.querySelectorAll('[data-route]').forEach(a=>a.classList.toggle('active',a.dataset.route===route));}
-function route(){const name=location.hash.replace('#','')||'inicio';setActiveNav(name);closeSidebar();({inicio:renderHome,gerar:renderGenerator,avisos:renderNotices,colaboradores:renderEmployees,unidades:renderUnits,historico:renderHistory}[name]||renderHome)();}
+function route(){const name=location.hash.replace('#','')||'inicio';setActiveNav(name);closeSidebar();({inicio:renderHome,gerar:renderGenerator,ultrassom:renderUltrasoundCounter,avisos:renderNotices,colaboradores:renderEmployees,unidades:renderUnits,historico:renderHistory}[name]||renderHome)();}
 function pageHeader(kicker,title,description,action=''){return `<header class="page-header"><div><span class="eyebrow">${esc(kicker)}</span><h1>${esc(title)}</h1><p>${esc(description)}</p></div>${action}</header>`;}
 function selectOptions(list,value,label='name'){return list.map(item=>`<option value="${esc(item.id)}" ${item.id===value?'selected':''}>${esc(item[label])}</option>`).join('');}
 function monthControls(){const now=new Date(),month=Number(sessionStorage.getItem('fp-month')||now.getMonth()+1),year=Number(sessionStorage.getItem('fp-year')||now.getFullYear());return {month,year};}
 function renderHome(){
  const active=state.employees.filter(e=>e.active).length,notice=state.notice;
- $('#workspace').innerHTML=`${pageHeader('UBSF NOVA SERTÂNIA','Serviços da unidade','Acesse documentos, cadastros e materiais de comunicação em um só lugar.',`<div class="header-stats"><b>${active}<small>colaboradores</small></b><b>1<small>aviso disponível</small></b></div>`)}<section class="service-grid"><a class="service-card featured" href="#gerar"><span class="service-icon">▣</span><small>GESTÃO DE FREQUÊNCIA</small><h2>Folha de ponto</h2><p>Gere folhas individuais ou um único PDF com os colaboradores selecionados.</p><b>Acessar serviço →</b></a><a class="service-card" href="#avisos"><span class="service-icon blue">◫</span><small>COMUNICAÇÃO</small><h2>Avisos para impressão</h2><p>Visualize e baixe as artes oficiais da unidade em PDF A4.</p><b>Ver materiais →</b></a><a class="service-card" href="#colaboradores"><span class="service-icon amber">♙</span><small>CADASTRO FUNCIONAL</small><h2>Colaboradores</h2><p>Mantenha nomes, cargos, situações e unidades sempre atualizados.</p><b>Gerenciar cadastros →</b></a></section><section class="home-highlight"><div><span class="eyebrow">NOVO MATERIAL</span><h2>Renovação de receitas</h2><p>A nova arte está pronta para impressão em A4 e também disponível para edição no Canva.</p><div><a class="primary" href="#avisos">Visualizar aviso</a><a class="secondary" href="${notice.pdf}" download>Baixar PDF</a></div></div><img src="${notice.image}" alt="Prévia do aviso sobre renovação de receitas"></section>`;
+ $('#workspace').innerHTML=`${pageHeader('UBSF NOVA SERTÂNIA','Serviços da unidade','Acesse documentos, cadastros e materiais de comunicação em um só lugar.',`<div class="header-stats"><b>${active}<small>colaboradores</small></b><b>${ultrasoundTotal(state.ultrasound.counts)}<small>pendências USG</small></b></div>`)}<section class="service-grid"><a class="service-card featured" href="#gerar"><span class="service-icon">▣</span><small>GESTÃO DE FREQUÊNCIA</small><h2>Folha de ponto</h2><p>Gere folhas individuais ou um único PDF com os colaboradores selecionados.</p><b>Acessar serviço →</b></a><a class="service-card ultrasound-service" href="#ultrassom"><span class="service-icon violet">◉</span><small>CONTROLE DE EXAMES</small><h2>Pendências de ultrassom</h2><p>Conte por tipo com os botões + e − e copie a linha pronta para o Google Planilhas.</p><b>Abrir contador →</b></a><a class="service-card" href="#avisos"><span class="service-icon blue">◫</span><small>COMUNICAÇÃO</small><h2>Avisos para impressão</h2><p>Visualize e baixe as artes oficiais da unidade em PDF A4.</p><b>Ver materiais →</b></a><a class="service-card" href="#colaboradores"><span class="service-icon amber">♙</span><small>CADASTRO FUNCIONAL</small><h2>Colaboradores</h2><p>Mantenha nomes, cargos, situações e unidades sempre atualizados.</p><b>Gerenciar cadastros →</b></a></section><section class="home-highlight"><div><span class="eyebrow">NOVO MATERIAL</span><h2>Renovação de receitas</h2><p>A nova arte está pronta para impressão em A4 e também disponível para edição no Canva.</p><div><a class="primary" href="#avisos">Visualizar aviso</a><a class="secondary" href="${notice.pdf}" download>Baixar PDF</a></div></div><img src="${notice.image}" alt="Prévia do aviso sobre renovação de receitas"></section>`;
 }
+
+function readLocalUltrasound(){try{const value=JSON.parse(localStorage.getItem(ULTRASOUND_LOCAL_KEY)||'null');return value&&typeof value==='object'?value:null;}catch{return null;}}
+function writeLocalUltrasound(){localStorage.setItem(ULTRASOUND_LOCAL_KEY,JSON.stringify({counts:state.ultrasound.counts,updatedAt:state.ultrasound.updatedAt||new Date().toISOString()}));}
+function setUltrasoundSaveStatus(text,error=false){const item=$('#ultrasound-save-status');if(item){item.textContent=text;item.classList.toggle('error',error);}}
+function queueUltrasoundSave(){
+ state.ultrasound.updatedAt=new Date().toISOString();writeLocalUltrasound();setUltrasoundSaveStatus('Salvando…');clearTimeout(ultrasoundSaveTimer);
+ ultrasoundSaveTimer=setTimeout(()=>{
+  const counts=normalizeUltrasoundCounts(state.ultrasound.counts),updatedAt=state.ultrasound.updatedAt;
+  ultrasoundSaveQueue=ultrasoundSaveQueue.then(async()=>{
+   const {data,error}=await supabase.from('fp_ultrasound_counters').upsert({id:ULTRASOUND_ROW_ID,unit_name:'UBSF NOVA SERTÂNIA',counts,updated_by:state.session.user.id},{onConflict:'id'}).select().single();
+   if(error)throw error;if(updatedAt===state.ultrasound.updatedAt){state.ultrasound.updatedAt=data.updated_at;writeLocalUltrasound();setUltrasoundSaveStatus(`Salvo às ${new Date(data.updated_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`);}
+  }).catch(error=>{console.error(error);setUltrasoundSaveStatus('Salvo neste aparelho; sincronização pendente.',true);});
+ },350);
+}
+function refreshUltrasoundCounter(){
+ const counts=state.ultrasound.counts;
+ ULTRASOUND_TYPES.forEach(type=>{const value=document.querySelector(`[data-usg-value="${type.key}"]`),minus=document.querySelector(`[data-usg-change="${type.key}"][data-delta="-1"]`);if(value)value.textContent=counts[type.key];if(minus)minus.disabled=counts[type.key]===0;});
+ const total=ultrasoundTotal(counts),filled=ULTRASOUND_TYPES.filter(type=>counts[type.key]>0).length;
+ if($('#ultrasound-total'))$('#ultrasound-total').textContent=total;if($('#ultrasound-filled'))$('#ultrasound-filled').textContent=filled;
+}
+function renderUltrasoundCounter(){
+ const counts=state.ultrasound.counts,total=ultrasoundTotal(counts),updated=state.ultrasound.updatedAt?new Date(state.ultrasound.updatedAt).toLocaleString('pt-BR'):'Ainda não salvo';
+ const cards=ULTRASOUND_TYPES.map((type,index)=>`<article class="usg-counter-card"><header><span>${String(index+1).padStart(2,'0')}</span><div><small>${esc(type.sheetLabel)}</small><h2>${esc(type.label)}</h2></div></header><div class="usg-stepper"><button type="button" data-usg-change="${type.key}" data-delta="-1" aria-label="Diminuir ${esc(type.label)}" ${counts[type.key]===0?'disabled':''}>−</button><strong data-usg-value="${type.key}" aria-live="polite">${counts[type.key]}</strong><button type="button" class="plus" data-usg-change="${type.key}" data-delta="1" aria-label="Adicionar ${esc(type.label)}">＋</button></div></article>`).join('');
+ $('#workspace').innerHTML=`${pageHeader('CONTROLE DA NOVA SERTÂNIA','Pendências de ultrassom','Conte cada solicitação e copie os 12 valores na mesma ordem das colunas do Google Planilhas.',`<div class="header-stats"><b id="ultrasound-total">${total}<small>total</small></b><b id="ultrasound-filled">${ULTRASOUND_TYPES.filter(type=>counts[type.key]>0).length}<small>tipos preenchidos</small></b></div>`)}<section class="usg-guide"><div><span class="eyebrow">COMO USAR</span><h2>Um toque, uma pendência</h2><p>Use <strong>＋</strong> para somar e <strong>−</strong> para corrigir. Cada alteração é salva automaticamente.</p></div><div class="usg-guide-actions"><button class="secondary" id="clear-ultrasound">↺ Limpar contagem</button><button class="primary" id="copy-ultrasound">▣ Copiar 12 quantidades</button></div><small id="ultrasound-save-status">Último salvamento: ${esc(updated)}</small></section><section class="usg-counter-grid">${cards}</section><section class="usg-copy-preview"><div><span class="eyebrow">ORDEM DA PLANILHA</span><h2>Pronto para colar na linha “NOVA SERTÂNIA”</h2><p>Clique em “Copiar”, selecione a primeira célula em <strong>&lt; 5 ANOS</strong> e use Colar. A coluna TOTAL permanece livre para a fórmula da planilha.</p></div><ol>${ULTRASOUND_TYPES.map((type,index)=>`<li><span>${index+1}</span>${esc(type.sheetLabel)}</li>`).join('')}</ol></section>`;
+ $('#workspace').onclick=event=>{const button=event.target.closest('[data-usg-change]');if(!button)return;state.ultrasound.counts=changeUltrasoundCount(state.ultrasound.counts,button.dataset.usgChange,button.dataset.delta);refreshUltrasoundCounter();queueUltrasoundSave();};
+ $('#copy-ultrasound').onclick=copyUltrasoundRow;$('#clear-ultrasound').onclick=clearUltrasoundCounter;
+}
+async function copyUltrasoundRow(){
+ const text=ultrasoundSpreadsheetRow(state.ultrasound.counts);
+ try{await navigator.clipboard.writeText(text);}catch{const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.append(area);area.select();document.execCommand('copy');area.remove();}
+ toast('12 quantidades copiadas na ordem da planilha. Agora é só colar na primeira célula.');
+}
+function clearUltrasoundCounter(){if(!confirm('Limpar todas as 12 quantidades? Esta ação iniciará uma nova contagem.'))return;state.ultrasound.counts=emptyUltrasoundCounts();refreshUltrasoundCounter();queueUltrasoundSave();toast('Contagem zerada. Você já pode começar um novo dia.');}
 function renderNotices(){
  const notice=state.notice,sync=state.canvaSync||{},connected=Boolean(sync.connected),configured=Boolean(sync.configured);
  const syncLabel=connected?(sync.sync_status==='error'?'A sincronização precisa de atenção':'Sincronização automática ativa'):(configured?'Autorização do Canva pendente':'Configuração inicial do Canva');
