@@ -9,6 +9,9 @@ um dos módulos do portal, ao lado da biblioteca de avisos para impressão.
 - cadastro de unidades e colaboradores;
 - seleção múltipla com busca e filtros;
 - geração mensal em A4, uma página por colaborador;
+- controle persistente do saldo de dias de folga por colaborador;
+- justificativas individuais ou aplicação da mesma observação em grupo;
+- geração de fichas de folga em A4 com quantidade livre de vias e paginação automática;
 - pré-visualização antes do download;
 - histórico de documentos gerados;
 - contador persistente das pendências de ultrassom da UBSF Nova Sertânia, com
