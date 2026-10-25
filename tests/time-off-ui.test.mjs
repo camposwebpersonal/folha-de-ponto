@@ -13,6 +13,7 @@ test('expõe o módulo de saldo de folgas no menu e na página inicial',()=>{
 
 test('permite observação em grupo, edição individual e vias por colaborador',()=>{
  assert.match(app,/OBSERVAÇÃO EM GRUPO/);assert.match(app,/observation_mode:'group'/);assert.match(app,/observation_mode='individual'/);assert.match(app,/data-field="copies"/);
+ assert.match(app,/Responsável no cabeçalho/);assert.match(app,/Deixar em branco para preencher à mão/);assert.match(app,/generateTimeOffPdf\(entries,\{responsible\}\)/);
 });
 
 test('mantém layout responsivo e compacto do módulo',()=>{

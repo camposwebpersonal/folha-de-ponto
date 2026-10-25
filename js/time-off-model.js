@@ -1,4 +1,4 @@
-export const TIME_OFF_ROWS_PER_PAGE=24;
+export const TIME_OFF_ROWS_PER_PAGE=31;
 
 export function normalizeBalanceDays(value){
  const number=Number(value);
